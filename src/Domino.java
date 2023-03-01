@@ -7,12 +7,18 @@ public class Domino {
         this.first = first;
         this.second = second;
     }
+    public int getFirst() {
+        return first;
+    }
 
+    public int getSecond() {
+        return second;
+    }
     public boolean contains (int n) {
         return first == n || second == n;
     }
 
     public String toString() {
-        return "[" + first + " " + second + "]";
+        return "[" + first + "  " + second + "]";
     }
 }
