@@ -1,5 +1,4 @@
 public class Domino {
-
     private int first;
     private int second;
 
@@ -20,5 +19,10 @@ public class Domino {
 
     public String toString() {
         return "[" + first + "  " + second + "]";
+    }
+    public void rotate() {
+        int temp = first;
+        first = second;
+        second = temp;
     }
 }

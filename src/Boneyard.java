@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Boneyard {
-    private final ArrayList<Domino> boneyard = new ArrayList<Domino>();
+    private final ArrayList<Domino> boneyard = new ArrayList<>();
 
     public Boneyard() {
         for (int i = 0; i <= 6; i++) {
@@ -33,6 +33,8 @@ public class Boneyard {
 //    }
 
     public String toString() {
+        if (boneyard.size() == 1) return "Boneyard contains " + 1 + " domino\n";
+        if (boneyard.isEmpty()) return "Boneyard is empty\n";
         return "Boneyard contains " + boneyard.size() + " dominos\n";
     }
 

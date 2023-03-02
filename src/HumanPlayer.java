@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 
 public class HumanPlayer {
-    private ArrayList<Domino> rack = new ArrayList<Domino>();
+    private ArrayList<Domino> rack = new ArrayList<>();
 
     public HumanPlayer(Boneyard boneyard) {
         for (int i = 0; i < 7; i++) {
@@ -22,7 +22,7 @@ public class HumanPlayer {
     }
 
     public void add (Domino d) {
-        rack.add(d);
+        rack.add(0, d);
     }
 
 }
