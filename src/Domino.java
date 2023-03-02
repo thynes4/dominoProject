@@ -13,6 +13,7 @@ public class Domino {
     public int getSecond() {
         return second;
     }
+
     public boolean contains (int n) {
         return first == n || second == n;
     }

@@ -1,16 +1,18 @@
 import javafx.application.Application;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Scanner;
 
 public class Main extends Application {
     private static boolean myTurn = true;
     private static boolean finished = false;
-    private int selectedIndex = -1;
+    private static String leftOrRight = null;
+
     public static void main(String[] args) {
         Scanner scnr = new Scanner(System.in);
-        String input = null;
+        String input;
 
         System.out.print("Which version of Dominos would you like to play?\n[c] Console\n[g] Graphical\n");
         input = scnr.next();
@@ -28,31 +30,60 @@ public class Main extends Application {
         System.out.println("Dominos!");
 
         while (!finished) {
+
+            if (computer.getRack().size() == 0 && boneyard.isEmpty()) break;
+            if (user.getRack().size() == 0 && boneyard.isEmpty()) break;
+            if (boneyard.isEmpty() && !availableMove(gameBoard, user.getRack()) && !availableMove(gameBoard, computer.getRack())) break;
+
             while (myTurn) {
+                if (boneyard.isEmpty() && !availableMove(gameBoard, user.getRack())) {
+                    System.out.println("Nothing I can play!");
+                    myTurn = false;
+                    break;
+                }
                 System.out.print(computer.toString() + boneyard + gameBoard + user + printTurn() + printMenu());
                 input = scnr.next();
                 switch (input) {
                     case ("p") -> {
                         System.out.println("Which Domino?");
                         input = scnr.next();
-                        if (Integer.parseInt(input) > user. || Integer.parseInt(input) < 0)
-
-                        System.out.println("Left or Right? (l/r)");
-                        input = scnr.next();
-
-                        if (Objects.equals(input, "l")) {
-
+                        if (Integer.parseInt(input) > user.getSize() - 1 || Integer.parseInt(input) < 0)
+                        {
+                            System.out.println("Invalid domino index, select again.");
                         } else {
+                            int selectedIndex = Integer.parseInt(input);
+                            System.out.println("Left or Right? (l/r)");
+                            input = scnr.next();
 
+                            if (Objects.equals(input, "l")) {
+
+                                leftOrRight = "left";
+                                playUserMove(scnr, user, gameBoard, selectedIndex);
+                                if (user.getRack().size() == 0 && boneyard.isEmpty()) finished = true;
+
+                            } else if (Objects.equals(input, "r")) {
+
+                                leftOrRight = "right";
+                                playUserMove(scnr, user, gameBoard, selectedIndex);
+                                if (user.getRack().size() == 0 && boneyard.isEmpty()) finished = true;
+
+                            } else {
+                                leftOrRight = null;
+                                System.out.println("Please choose either \"l\" or \"r\", select again.");
+                            }
                         }
                     }
                     case ("d") -> {
-                        if (!boneyard.isEmpty()) {
+                        if (user.getRack().size() == 0 && !boneyard.isEmpty()) {
                             user.add(boneyard.draw());
                             System.out.println("Domino drawn");
-                            myTurn = false;
+                        } else if (availableMove(gameBoard, user.getRack())) {
+                            System.out.println("You have a domino that can be played!");
+                        } else if (!boneyard.isEmpty()) {
+                            user.add(boneyard.draw());
+                            System.out.println("Domino drawn");
                         } else {
-                            System.out.println("Boneyard is empty!");
+                            finished = true;
                         }
                     }
                     case ("q") -> {
@@ -62,16 +93,26 @@ public class Main extends Application {
                 }
             }
 
+            if (boneyard.isEmpty() && !availableMove(gameBoard, user.getRack()) && !availableMove(gameBoard, computer.getRack())) break;
+
             System.out.print(printTurn());
 
             while (!myTurn) {
+                if (computer.getRack().size() == 0 && boneyard.isEmpty()) finished = true;
+                if (boneyard.isEmpty() && !availableMove(gameBoard, computer.getRack())) {
+                    System.out.println("Nothing I can play!");
+                    myTurn = true;
+                    break;
+                }
                 for (Domino d : computer.getRack()) {
                     if (playIfPossible(computer, gameBoard, d)) {
+                        if (computer.getRack().size() == 0 && boneyard.isEmpty()) finished = true;
                         myTurn = true;
                         break;
                     }
                     d.rotate();
                     if (playIfPossible(computer, gameBoard, d)) {
+                        if (computer.getRack().size() == 0 && boneyard.isEmpty()) finished = true;
                         myTurn = true;
                         break;
                     }
@@ -84,7 +125,68 @@ public class Main extends Application {
                 }
             }
         }
-        //game is over
+
+        final int usersScore = calculateScore(user.getRack());
+        final int computerScore = calculateScore(computer.getRack());
+
+        System.out.println("Computer's score: " + computerScore);
+        System.out.println("Player's score: " + usersScore);
+
+        System.out.println();
+
+        if (usersScore < computerScore) {
+            System.out.println("You Win!");
+        }
+        if (usersScore > computerScore) {
+            System.out.println("You Lose :(");
+        }
+        if (computerScore == usersScore) {
+            if (myTurn) {
+                System.out.println("Same score but you played last so you win!");
+            } else {
+                System.out.println("Same score but the computer played last so you lose :(");
+            }
+        }
+    }
+    private static int calculateScore (ArrayList<Domino> rack) {
+        int score = 0;
+        for (Domino d: rack) {
+            score = score + d.getFirst();
+            score = score + d.getSecond();
+        }
+        return score;
+    }
+    private static void playUserMove(Scanner scnr, HumanPlayer user, Board gameBoard, int selectedIndex) {
+        String input;
+        System.out.println("Rotate first? (y/n)");
+        input = scnr.next();
+        String rotate = input;
+
+        if (Objects.equals(rotate, "y")) {
+            user.rotateAt(selectedIndex);
+        }
+        else if (!Objects.equals(rotate, "n")) {
+            System.out.println("Please choose either \"y\" or \"n\", select again.");
+            return;
+        }
+
+        if (Objects.equals(leftOrRight, "left")) {
+            if (gameBoard.validMoveLeft(user.get(selectedIndex))) {
+                System.out.println(printMove(user.get(selectedIndex), leftOrRight));
+                gameBoard.addDominoLeft(user.remove(selectedIndex));
+                myTurn = false;
+            } else {
+                System.out.println("Invalid move, try again.");
+            }
+        } else if (Objects.equals(leftOrRight, "right")) {
+            if (gameBoard.validMoveRight(user.get(selectedIndex))) {
+                System.out.println(printMove(user.get(selectedIndex), leftOrRight));
+                gameBoard.addDominoRight(user.remove(selectedIndex));
+                myTurn = false;
+            } else {
+                System.out.println("Invalid move, try again.");
+            }
+        }
     }
 
 
@@ -97,6 +199,20 @@ public class Main extends Application {
             gameBoard.addDominoLeft(computer.remove(d));
             System.out.println(printMove(d,"left"));
             return true;
+        }
+        return false;
+    }
+
+    private static boolean availableMove (Board gameBoard, ArrayList<Domino> rack) {
+        for (Domino d: rack) {
+            if (gameBoard.isEmpty()
+                    || d.contains(gameBoard.getFirstValue())
+                    || d.contains(gameBoard.getLastValue())
+                    || d.contains(0)
+                    || gameBoard.getFirstValue() == 0
+                    || gameBoard.getLastValue() == 0) {
+                return true;
+            }
         }
         return false;
     }

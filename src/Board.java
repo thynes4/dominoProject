@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 
 public class Board {
-    private static ArrayList<Domino> gameBoard = new ArrayList<>();
+    private static final ArrayList<Domino> gameBoard = new ArrayList<>();
 
     public void addDominoRight (Domino d) {
         gameBoard.add(d);
@@ -14,6 +14,16 @@ public class Board {
                 || d.getSecond() == gameBoard.get(0).getFirst()
                 || d.getSecond() == 0
                 || gameBoard.get(0).getFirst() == 0;
+    }
+
+    public int getFirstValue () {
+        return gameBoard.get(0).getFirst();
+    }
+    public boolean isEmpty() {
+        return gameBoard.size() == 0;
+    }
+    public int getLastValue () {
+        return gameBoard.get(gameBoard.size() - 1).getSecond();
     }
 
     public boolean validMoveRight (Domino d) {
