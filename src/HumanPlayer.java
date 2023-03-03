@@ -13,6 +13,15 @@ public class HumanPlayer {
     }
     public String toString() {
         StringBuilder sb = new StringBuilder();
+        if(!rack.isEmpty()) {
+            sb.append("         ");
+
+            for (Domino d : rack) {
+                sb.append(rack.indexOf(d));
+                sb.append("      ");
+            }
+            sb.append("\n");
+        }
         sb.append("Tray: [");
 
         if (rack.isEmpty()) {
