@@ -110,22 +110,25 @@ public class Main extends Application {
     }
 
     private void checkWinComputerMove(Boneyard boneyard, HumanPlayer user, ComputerPlayer computer, Board gameBoard, BorderPane root, Label computerText, Label boneyardText) {
+        boolean over = false;
         if (checkWin (1, boneyard, computer, user, gameBoard) == 1) {
             clearRoot(root);
+            over = true;
             root.setCenter(new Label("You won!"));
         } else if (checkWin (1, boneyard, computer, user, gameBoard) == 2) {
             clearRoot(root);
+            over = true;
             root.setCenter(new Label("Computer won ):"));
         }
+        if (!over) {
+            guiComputerMove(boneyard, user, computer, gameBoard, root);
+            checkWin(boneyard, user, computer, gameBoard, root);
 
-        guiComputerMove(boneyard, user, computer, gameBoard, root);
-
-        checkWin(boneyard, user, computer, gameBoard, root);
-
-        boneyardText.setText(null);
-        boneyardText.setText(boneyard.toString());
-        computerText.setText(null);
-        computerText.setText(computer.toString());
+            boneyardText.setText(null);
+            boneyardText.setText(boneyard.toString());
+            computerText.setText(null);
+            computerText.setText(computer.toString());
+        }
     }
 
     public static void main(String[] args) {
