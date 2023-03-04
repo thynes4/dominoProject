@@ -1,3 +1,7 @@
+import javafx.geometry.Pos;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+
 import java.util.ArrayList;
 
 public class Board {
@@ -46,5 +50,29 @@ public class Board {
         }
         sb.append("\n");
         return sb.toString();
+    }
+
+    public VBox drawBoard() {
+        VBox boardDrawing = new VBox();
+        HBox topRow = new HBox();
+        HBox buffer = new HBox();
+        HBox bottomRow = new HBox();
+
+        boardDrawing.setAlignment(Pos.CENTER);
+        boardDrawing.setSpacing(10);
+        buffer.setPrefWidth(44);
+        topRow.setSpacing(10);
+        bottomRow.setSpacing(10);
+        bottomRow.getChildren().add(buffer);
+
+        for (int i = 0; i < gameBoard.size(); i = i + 2) {
+            topRow.getChildren().add(gameBoard.get(i).draw());
+        }
+
+        for(int i = 1; i < gameBoard.size(); i = i + 2) {
+            bottomRow.getChildren().add(gameBoard.get(i).draw());
+        }
+        boardDrawing.getChildren().addAll(topRow,bottomRow);
+        return boardDrawing;
     }
 }

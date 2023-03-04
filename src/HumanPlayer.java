@@ -1,8 +1,12 @@
+import javafx.geometry.Pos;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+
 import java.util.ArrayList;
 
 public class HumanPlayer {
     private final ArrayList<Domino> rack = new ArrayList<>();
-
     public HumanPlayer(Boneyard boneyard) {
         for (int i = 0; i < 7; i++) {
             rack.add(boneyard.draw());
@@ -56,6 +60,29 @@ public class HumanPlayer {
 
     public void add (Domino d) {
         rack.add(0, d);
+    }
+    public VBox drawRack(BorderPane root) {
+        VBox container = new VBox();
+        VBox buffer = new VBox();
+        buffer.setPrefHeight(30);
+        container.setAlignment(Pos.CENTER);
+        HBox playerRack = new HBox();
+        playerRack.setSpacing(10);
+        playerRack.setAlignment(Pos.CENTER);
+        for (Domino d: rack) {
+            HBox drawing = d.draw();
+            drawing.setOnMouseClicked(event -> {
+                for (Domino dom: rack) {
+                    dom.removeSelected();
+                }
+                d.setSelected();
+                root.setBottom(null);
+                root.setBottom(drawRack(root));
+            });
+            playerRack.getChildren().add(drawing);
+        }
+        container.getChildren().addAll(playerRack, buffer);
+        return container;
     }
 
 }

@@ -1,4 +1,7 @@
 import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -10,6 +13,42 @@ public class Main extends Application {
     private static boolean finished = false;
     private static String leftOrRight = null;
 
+    @Override
+    public void start(Stage stage) {
+        Boneyard boneyard = new Boneyard();
+        HumanPlayer user = new HumanPlayer(boneyard);
+        ComputerPlayer computer = new ComputerPlayer(boneyard);
+        Board gameBoard = new Board();
+        BorderPane root = new BorderPane();
+        Button flip = new Button();
+
+        stage.setTitle("Dominos!");
+        flip.setText("Flip");
+
+        gameBoard.addDominoRight(new Domino(2, 3));
+        gameBoard.addDominoRight(new Domino(6, 2));
+        gameBoard.addDominoRight(new Domino(5, 3));
+        gameBoard.addDominoRight(new Domino(4, 6));
+        gameBoard.addDominoRight(new Domino(1, 0));
+        gameBoard.addDominoRight(new Domino(3, 2));
+
+
+        root.setTop(flip);
+        root.setCenter(gameBoard.drawBoard());
+        root.setBottom(user.drawRack(root));
+        stage.setScene(new Scene(root, 900,600));
+        stage.show();
+
+        flip.setOnAction(event -> {
+            for (Domino d: user.getRack()) {
+                if (d.isSelected()) {
+                    d.rotate();
+                }
+            }
+            root.setBottom(null);
+            root.setBottom(user.drawRack(root));
+        });
+    }
     public static void main(String[] args) {
         Scanner scnr = new Scanner(System.in);
         String input;
@@ -217,10 +256,6 @@ public class Main extends Application {
         return false;
     }
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-
-    }
     private static String printMenu() {
         return "[p] Play Domino\n[d] Draw from boneyard\n[q] Quit\n";
     }
