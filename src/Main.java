@@ -2,6 +2,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -20,26 +21,39 @@ public class Main extends Application {
         ComputerPlayer computer = new ComputerPlayer(boneyard);
         Board gameBoard = new Board();
         BorderPane root = new BorderPane();
-        Button flip = new Button();
+        Button flipBtn = new Button();
+        Button drawBtn = new Button();
+        Button placeLeft = new Button();
+        Button placeRight = new Button();
+        HBox topHolder = new HBox(flipBtn, drawBtn, placeLeft, placeRight);
 
         stage.setTitle("Dominos!");
-        flip.setText("Flip");
+        flipBtn.setText("Flip");
+        drawBtn.setText("Draw");
+        placeRight.setText("Place right");
+        placeLeft.setText("Place left");
 
-        gameBoard.addDominoRight(new Domino(2, 3));
-        gameBoard.addDominoRight(new Domino(6, 2));
-        gameBoard.addDominoRight(new Domino(5, 3));
-        gameBoard.addDominoRight(new Domino(4, 6));
-        gameBoard.addDominoRight(new Domino(1, 0));
-        gameBoard.addDominoRight(new Domino(3, 2));
-
-
-        root.setTop(flip);
+        root.setTop(topHolder);
         root.setCenter(gameBoard.drawBoard());
         root.setBottom(user.drawRack(root));
-        stage.setScene(new Scene(root, 900,600));
+        root.setStyle("-fx-background-color: lightgray");
+
+        stage.setScene(new Scene(root, 1500,600));
         stage.show();
 
-        flip.setOnAction(event -> {
+        drawBtn.setOnAction(event -> {
+            if ((user.getRack().size() == 0 && !boneyard.isEmpty())
+                    || (!boneyard.isEmpty() && !availableMove(gameBoard, user.getRack()))) {
+                user.add(boneyard.draw());
+
+                root.setCenter(null);
+                root.setBottom(null);
+                root.setCenter(gameBoard.drawBoard());
+                root.setBottom(user.drawRack(root));
+            }
+        });
+
+        flipBtn.setOnAction(event -> {
             for (Domino d: user.getRack()) {
                 if (d.isSelected()) {
                     d.rotate();
@@ -48,7 +62,30 @@ public class Main extends Application {
             root.setBottom(null);
             root.setBottom(user.drawRack(root));
         });
+
+        placeLeft.setOnAction(event -> {
+            for (Domino d: user.getRack()) {
+                if (d.isSelected() && gameBoard.validMoveLeft(d)) {
+                    d.removeSelected();
+                    gameBoard.addDominoLeft(user.remove(d));
+                    guiComputerMove(boneyard, user, computer, gameBoard, root);
+                    break;
+                }
+            }
+        });
+
+        placeRight.setOnAction(event -> {
+            for (Domino d: user.getRack()) {
+                if (d.isSelected() && gameBoard.validMoveRight(d)) {
+                    d.removeSelected();
+                    gameBoard.addDominoRight(user.remove(d));
+                    guiComputerMove(boneyard, user, computer, gameBoard, root);
+                    break;
+                }
+            }
+        });
     }
+
     public static void main(String[] args) {
         Scanner scnr = new Scanner(System.in);
         String input;
@@ -143,25 +180,7 @@ public class Main extends Application {
                     myTurn = true;
                     break;
                 }
-                for (Domino d : computer.getRack()) {
-                    if (playIfPossible(computer, gameBoard, d)) {
-                        if (computer.getRack().size() == 0 && boneyard.isEmpty()) finished = true;
-                        myTurn = true;
-                        break;
-                    }
-                    d.rotate();
-                    if (playIfPossible(computer, gameBoard, d)) {
-                        if (computer.getRack().size() == 0 && boneyard.isEmpty()) finished = true;
-                        myTurn = true;
-                        break;
-                    }
-                }
-                if (!myTurn && !boneyard.isEmpty()) {
-                    computer.add(boneyard.draw());
-                }
-                if (!myTurn && boneyard.isEmpty()) {
-                    myTurn = true;
-                }
+                computerPlayed(boneyard, computer, gameBoard);
             }
         }
 
@@ -187,6 +206,46 @@ public class Main extends Application {
             }
         }
     }
+
+    private static void computerPlayed(Boneyard boneyard, ComputerPlayer computer, Board gameBoard) {
+        for (Domino d : computer.getRack()) {
+            if (playIfPossible(computer, gameBoard, d)) {
+                if (computer.getRack().size() == 0 && boneyard.isEmpty()) finished = true;
+                myTurn = true;
+                break;
+            }
+            d.rotate();
+            if (playIfPossible(computer, gameBoard, d)) {
+                if (computer.getRack().size() == 0 && boneyard.isEmpty()) finished = true;
+                myTurn = true;
+                break;
+            }
+        }
+        if (!myTurn && !boneyard.isEmpty()) {
+            computer.add(boneyard.draw());
+        }
+        if (!myTurn && boneyard.isEmpty()) {
+            myTurn = true;
+        }
+    }
+
+    private void guiComputerMove(Boneyard boneyard, HumanPlayer user, ComputerPlayer computer, Board gameBoard, BorderPane root) {
+        myTurn = false;
+        while (!myTurn) {
+            if (computer.getRack().size() == 0 && boneyard.isEmpty()) finished = true;
+            if (boneyard.isEmpty() && !availableMove(gameBoard, computer.getRack())) {
+                myTurn = true;
+                break;
+            }
+            computerPlayed(boneyard, computer, gameBoard);
+        }
+
+        root.setCenter(null);
+        root.setBottom(null);
+        root.setCenter(gameBoard.drawBoard());
+        root.setBottom(user.drawRack(root));
+    }
+
     private static int calculateScore (ArrayList<Domino> rack) {
         int score = 0;
         for (Domino d: rack) {

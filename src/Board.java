@@ -59,10 +59,13 @@ public class Board {
         HBox bottomRow = new HBox();
 
         boardDrawing.setAlignment(Pos.CENTER);
+        topRow.setAlignment(Pos.CENTER);
+        bottomRow.setAlignment(Pos.CENTER);
+
         boardDrawing.setSpacing(10);
-        buffer.setPrefWidth(44);
-        topRow.setSpacing(10);
-        bottomRow.setSpacing(10);
+        buffer.setPrefWidth(78);
+        topRow.setSpacing(5);
+        bottomRow.setSpacing(5);
         bottomRow.getChildren().add(buffer);
 
         for (int i = 0; i < gameBoard.size(); i = i + 2) {

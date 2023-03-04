@@ -20,25 +20,16 @@ public class Domino {
         return second;
     }
 
-    public void setSelected() {
-        selected = true;
-    }
+    public void setSelected() { selected = true; }
 
-    public void removeSelected() {
-        selected = false;
-    }
+    public void removeSelected() { selected = false; }
 
-    public boolean isSelected() {
-        return selected;
-    }
+    public boolean isSelected() { return selected; }
 
-    public boolean contains (int n) {
-        return first == n || second == n;
-    }
+    public boolean contains (int n) { return first == n || second == n; }
 
-    public String toString() {
-        return "[" + first + "  " + second + "]";
-    }
+    public String toString() { return "[" + first + "  " + second + "]"; }
+
     public void rotate() {
         int temp = first;
         first = second;
@@ -62,7 +53,7 @@ public class Domino {
     }
 
     private Canvas drawPips (int n) {
-        double size = 50;
+        double size = 40;
         double pipRadius = size / 8;
 
         Canvas half = new Canvas(size, size);
@@ -71,7 +62,6 @@ public class Domino {
 
         gc.setFill(Color.BLACK);
         gc.strokeRect(0,0,size,size);
-
 
         switch (n) {
             case 0 -> {
@@ -100,15 +90,12 @@ public class Domino {
         }
         return half;
     }
-
     private void twoDots(double size, double pipRadius, GraphicsContext gc) {
         gc.fillOval(size/5 - pipRadius, 4*size/5 - pipRadius,2 * pipRadius, 2 * pipRadius);
         gc.fillOval(4*size/5 - pipRadius, size/5 - pipRadius,2 * pipRadius, 2 * pipRadius);
     }
-
     private void secondTwoDots(double size, double pipRadius, GraphicsContext gc) {
         gc.fillOval(size/5 - pipRadius, size/5 - pipRadius,2 * pipRadius, 2 * pipRadius);
         gc.fillOval(4*size/5 - pipRadius, 4*size/5 - pipRadius,2 * pipRadius, 2 * pipRadius);
     }
-
 }

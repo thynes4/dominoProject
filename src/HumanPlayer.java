@@ -46,6 +46,10 @@ public class HumanPlayer {
         rack.remove(removed);
         return removed;
     }
+    public Domino remove (Domino d) {
+        rack.remove(d);
+        return d;
+    }
     public void rotateAt(int index) {
         Domino d = rack.get(index);
         d.rotate();
