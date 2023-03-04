@@ -1,8 +1,9 @@
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -13,7 +14,6 @@ public class Main extends Application {
     private static boolean myTurn = true;
     private static boolean finished = false;
     private static String leftOrRight = null;
-
     @Override
     public void start(Stage stage) {
         Boneyard boneyard = new Boneyard();
@@ -25,7 +25,10 @@ public class Main extends Application {
         Button drawBtn = new Button();
         Button placeLeft = new Button();
         Button placeRight = new Button();
-        HBox topHolder = new HBox(flipBtn, drawBtn, placeLeft, placeRight);
+        VBox sideHolder = new VBox();
+
+        Label computerText = new Label(computer.toString());
+        Label boneyardText = new Label(boneyard.toString());
 
         stage.setTitle("Dominos!");
         flipBtn.setText("Flip");
@@ -33,12 +36,14 @@ public class Main extends Application {
         placeRight.setText("Place right");
         placeLeft.setText("Place left");
 
-        root.setTop(topHolder);
+        sideHolder.getChildren().addAll(flipBtn, drawBtn, placeLeft, placeRight, boneyardText,computerText);
+
+        root.setLeft(sideHolder);
         root.setCenter(gameBoard.drawBoard());
         root.setBottom(user.drawRack(root));
         root.setStyle("-fx-background-color: lightgray");
 
-        stage.setScene(new Scene(root, 1500,600));
+        stage.setScene(new Scene(root, 1600,600));
         stage.show();
 
         drawBtn.setOnAction(event -> {
@@ -46,8 +51,14 @@ public class Main extends Application {
                     || (!boneyard.isEmpty() && !availableMove(gameBoard, user.getRack()))) {
                 user.add(boneyard.draw());
 
+                checkWin(boneyard, user, computer, gameBoard, root);
+
                 root.setCenter(null);
                 root.setBottom(null);
+
+                boneyardText.setText(null);
+                boneyardText.setText(boneyard.toString());
+
                 root.setCenter(gameBoard.drawBoard());
                 root.setBottom(user.drawRack(root));
             }
@@ -68,7 +79,8 @@ public class Main extends Application {
                 if (d.isSelected() && gameBoard.validMoveLeft(d)) {
                     d.removeSelected();
                     gameBoard.addDominoLeft(user.remove(d));
-                    guiComputerMove(boneyard, user, computer, gameBoard, root);
+
+                    checkWinComputerMove(boneyard, user, computer, gameBoard, root, computerText, boneyardText);
                     break;
                 }
             }
@@ -79,11 +91,41 @@ public class Main extends Application {
                 if (d.isSelected() && gameBoard.validMoveRight(d)) {
                     d.removeSelected();
                     gameBoard.addDominoRight(user.remove(d));
-                    guiComputerMove(boneyard, user, computer, gameBoard, root);
+
+                    checkWinComputerMove(boneyard, user, computer, gameBoard, root, computerText, boneyardText);
                     break;
                 }
             }
         });
+    }
+
+    private void checkWin(Boneyard boneyard, HumanPlayer user, ComputerPlayer computer, Board gameBoard, BorderPane root) {
+        if (checkWin (2, boneyard, computer, user, gameBoard) == 1) {
+            clearRoot(root);
+            root.setCenter(new Label("You won!"));
+        } else if (checkWin (2, boneyard, computer, user, gameBoard) == 2) {
+            clearRoot(root);
+            root.setCenter(new Label("Computer won ):"));
+        }
+    }
+
+    private void checkWinComputerMove(Boneyard boneyard, HumanPlayer user, ComputerPlayer computer, Board gameBoard, BorderPane root, Label computerText, Label boneyardText) {
+        if (checkWin (1, boneyard, computer, user, gameBoard) == 1) {
+            clearRoot(root);
+            root.setCenter(new Label("You won!"));
+        } else if (checkWin (1, boneyard, computer, user, gameBoard) == 2) {
+            clearRoot(root);
+            root.setCenter(new Label("Computer won ):"));
+        }
+
+        guiComputerMove(boneyard, user, computer, gameBoard, root);
+
+        checkWin(boneyard, user, computer, gameBoard, root);
+
+        boneyardText.setText(null);
+        boneyardText.setText(boneyard.toString());
+        computerText.setText(null);
+        computerText.setText(computer.toString());
     }
 
     public static void main(String[] args) {
@@ -227,6 +269,29 @@ public class Main extends Application {
         if (!myTurn && boneyard.isEmpty()) {
             myTurn = true;
         }
+    }
+
+    private int checkWin(int lastPlayed, Boneyard b, ComputerPlayer c, HumanPlayer h, Board g) {
+        if (b.isEmpty() && (c.getRack().size() == 0 || h.getRack().size() == 0
+                || !availableMove(g, h.getRack()) || !availableMove(g, c.getRack()))) {
+            int hscore = calculateScore(h.getRack());
+            int cscore = calculateScore(c.getRack());
+            if (hscore > cscore) {
+                return 2;
+            } else if (hscore < cscore) {
+                return 1;
+            } else {
+                return lastPlayed;
+            }
+        }
+        return 0;
+    }
+
+    private void clearRoot (BorderPane root) {
+        root.setCenter(null);
+        root.setBottom(null);
+        root.setTop(null);
+        root.setLeft(null);
     }
 
     private void guiComputerMove(Boneyard boneyard, HumanPlayer user, ComputerPlayer computer, Board gameBoard, BorderPane root) {
