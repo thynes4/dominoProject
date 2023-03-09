@@ -1,9 +1,13 @@
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -21,24 +25,37 @@ public class Main extends Application {
         ComputerPlayer computer = new ComputerPlayer(boneyard);
         Board gameBoard = new Board();
         BorderPane root = new BorderPane();
-        Button flipBtn = new Button();
-        Button drawBtn = new Button();
-        Button placeLeft = new Button();
-        Button placeRight = new Button();
-        VBox sideHolder = new VBox();
+        Button flipBtn = makeButtonGood(new Button());
+        Button drawBtn = makeButtonGood(new Button());
+        Button placeLeft = makeButtonGood(new Button());
+        Button placeRight = makeButtonGood(new Button());
+        Label computerText = makeLabelGood(new Label(computer.toString()));
+        Label boneyardText = makeLabelGood(new Label(boneyard.toString()));
+        Label dominoesText = makeLabelGood(new Label("Dominos!"));
 
-        Label computerText = new Label(computer.toString());
-        Label boneyardText = new Label(boneyard.toString());
+        VBox sideHolder = new VBox();
+        HBox topHolder = new HBox();
+
+        topHolder.setSpacing(40);
+        topHolder.setAlignment(Pos.CENTER);
+        sideHolder.setSpacing(10);
+        dominoesText.setFont(Font.font("Helvetica", FontWeight.BOLD,50));
 
         stage.setTitle("Dominos!");
         flipBtn.setText("Flip");
         drawBtn.setText("Draw");
-        placeRight.setText("Place right");
-        placeLeft.setText("Place left");
+        placeRight.setText("Place Right");
+        placeLeft.setText("Place Left");
 
-        sideHolder.getChildren().addAll(flipBtn, drawBtn, placeLeft, placeRight, boneyardText,computerText);
+        placeLeft.setPrefHeight(2000);
+        placeRight.setPrefHeight(2000);
+
+        topHolder.getChildren().addAll(computerText, dominoesText, boneyardText);
+        sideHolder.getChildren().addAll(flipBtn, placeLeft, drawBtn);
 
         root.setLeft(sideHolder);
+        root.setRight(placeRight);
+        root.setTop(topHolder);
         root.setCenter(gameBoard.drawBoard());
         root.setBottom(user.drawRack(root));
         root.setStyle("-fx-background-color: lightgray");
@@ -51,16 +68,16 @@ public class Main extends Application {
                     || (!boneyard.isEmpty() && !availableMove(gameBoard, user.getRack()))) {
                 user.add(boneyard.draw());
 
-                checkWin(boneyard, user, computer, gameBoard, root);
+                if (!checkWin(boneyard, user, computer, gameBoard, root)) {
+                    root.setCenter(null);
+                    root.setBottom(null);
 
-                root.setCenter(null);
-                root.setBottom(null);
+                    boneyardText.setText(null);
+                    boneyardText.setText(boneyard.toString());
 
-                boneyardText.setText(null);
-                boneyardText.setText(boneyard.toString());
-
-                root.setCenter(gameBoard.drawBoard());
-                root.setBottom(user.drawRack(root));
+                    root.setCenter(gameBoard.drawBoard());
+                    root.setBottom(user.drawRack(root));
+                }
             }
         });
 
@@ -99,26 +116,39 @@ public class Main extends Application {
         });
     }
 
-    private void checkWin(Boneyard boneyard, HumanPlayer user, ComputerPlayer computer, Board gameBoard, BorderPane root) {
+    private boolean checkWin(Boneyard boneyard, HumanPlayer user, ComputerPlayer computer, Board gameBoard, BorderPane root) {
         if (checkWin (2, boneyard, computer, user, gameBoard) == 1) {
-            clearRoot(root);
-            root.setCenter(new Label("You won!"));
+            clearAndPrint(user, computer, root);
+            root.setCenter(makeLabelGood(new Label("You won!")));
+            return true;
         } else if (checkWin (2, boneyard, computer, user, gameBoard) == 2) {
-            clearRoot(root);
-            root.setCenter(new Label("Computer won ):"));
+            clearAndPrint(user, computer, root);
+            root.setCenter(makeLabelGood(new Label("Computer won ):")));
+            return true;
         }
+        return false;
+    }
+
+    private void clearAndPrint(HumanPlayer user, ComputerPlayer computer, BorderPane root) {
+        clearRoot(root);
+        root.setStyle("-fx-background-color: lightgray");
+        final int usersScore = calculateScore(user.getRack());
+        final int computerScore = calculateScore(computer.getRack());
+
+        System.out.println("Computer's score: " + computerScore);
+        System.out.println("Player's score: " + usersScore);
     }
 
     private void checkWinComputerMove(Boneyard boneyard, HumanPlayer user, ComputerPlayer computer, Board gameBoard, BorderPane root, Label computerText, Label boneyardText) {
         boolean over = false;
         if (checkWin (1, boneyard, computer, user, gameBoard) == 1) {
-            clearRoot(root);
+            clearAndPrint(user, computer, root);
             over = true;
-            root.setCenter(new Label("You won!"));
+            root.setCenter(makeLabelGood(new Label("You won!")));
         } else if (checkWin (1, boneyard, computer, user, gameBoard) == 2) {
-            clearRoot(root);
+            clearAndPrint(user, computer, root);
             over = true;
-            root.setCenter(new Label("Computer won ):"));
+            root.setCenter(makeLabelGood(new Label("Computer won ):")));
         }
         if (!over) {
             guiComputerMove(boneyard, user, computer, gameBoard, root);
@@ -295,6 +325,7 @@ public class Main extends Application {
         root.setBottom(null);
         root.setTop(null);
         root.setLeft(null);
+        root.setRight(null);
     }
 
     private void guiComputerMove(Boneyard boneyard, HumanPlayer user, ComputerPlayer computer, Board gameBoard, BorderPane root) {
@@ -400,5 +431,20 @@ public class Main extends Application {
         } else {
             return "Computer's turn\n";
         }
+    }
+
+    private Button makeButtonGood(Button button) {
+        button.setPrefSize(140,50);
+        button.setBackground(Background.fill(Color.rgb(255,255,255)));
+        button.setBorder(Border.stroke(Color.BLACK));
+        button.setFont(Font.font("Helvetica", FontWeight.BOLD,20));
+        return button;
+    }
+
+    private Label makeLabelGood(Label label) {
+        label.setTextAlignment(TextAlignment.CENTER);
+        label.setFont(Font.font("Helvetica", FontWeight.SEMI_BOLD,25));
+        label.setTextFill(Color.BLACK);
+        return label;
     }
 }
