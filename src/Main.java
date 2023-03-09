@@ -119,7 +119,7 @@ public class Main extends Application {
     private boolean checkWin(Boneyard boneyard, HumanPlayer user, ComputerPlayer computer, Board gameBoard, BorderPane root) {
         if (checkWin (2, boneyard, computer, user, gameBoard) == 1) {
             clearAndPrint(user, computer, root);
-            root.setCenter(makeLabelGood(new Label("You won!")));
+            root.setCenter(makeLabelGood(new Label("You won! :)")));
             return true;
         } else if (checkWin (2, boneyard, computer, user, gameBoard) == 2) {
             clearAndPrint(user, computer, root);
@@ -144,7 +144,7 @@ public class Main extends Application {
         if (checkWin (1, boneyard, computer, user, gameBoard) == 1) {
             clearAndPrint(user, computer, root);
             over = true;
-            root.setCenter(makeLabelGood(new Label("You won!")));
+            root.setCenter(makeLabelGood(new Label("You won! :)")));
         } else if (checkWin (1, boneyard, computer, user, gameBoard) == 2) {
             clearAndPrint(user, computer, root);
             over = true;
