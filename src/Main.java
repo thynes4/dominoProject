@@ -14,10 +14,23 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Scanner;
 
+/**
+ *  Welcome to Dominos!
+ */
 public class Main extends Application {
     private static boolean myTurn = true;
     private static boolean finished = false;
     private static String leftOrRight = null;
+
+    /**
+     * The start method contains the logic for the buttons and most of the drawing logic
+     * each button utilizes functions that were already used in the commandline version and
+     * also uses the same classes as the commandline version.
+     * @param stage the primary stage for this application, onto which
+     * the application scene can be set.
+     * Applications may create other stages, if needed, but they will not be
+     * primary stages.
+     */
     @Override
     public void start(Stage stage) {
         Boneyard boneyard = new Boneyard();
@@ -63,6 +76,8 @@ public class Main extends Application {
         stage.setScene(new Scene(root, 1600,600));
         stage.show();
 
+        // checks if there are not any possible moves, or your rack is empty and also if the
+        // boneyard is empty, if so allows you to draw a domino then checks if the game is over.
         drawBtn.setOnAction(event -> {
             if ((user.getRack().size() == 0 && !boneyard.isEmpty())
                     || (!boneyard.isEmpty() && !availableMove(gameBoard, user.getRack()))) {
@@ -80,7 +95,8 @@ public class Main extends Application {
                 }
             }
         });
-
+        // uses same rotate domino method used in commandline version
+        //flips the selected domino
         flipBtn.setOnAction(event -> {
             for (Domino d: user.getRack()) {
                 if (d.isSelected()) {
@@ -90,7 +106,8 @@ public class Main extends Application {
             root.setBottom(null);
             root.setBottom(user.drawRack(root));
         });
-
+        // checks if selected domino can be placed in the left spot and places it if possible
+        // if domino is placed checks win condition
         placeLeft.setOnAction(event -> {
             for (Domino d: user.getRack()) {
                 if (d.isSelected() && gameBoard.validMoveLeft(d)) {
@@ -103,6 +120,8 @@ public class Main extends Application {
             }
         });
 
+        // checks if selected domino can be placed in the right spot and places it if possible
+        // if domino is placed checks win condition
         placeRight.setOnAction(event -> {
             for (Domino d: user.getRack()) {
                 if (d.isSelected() && gameBoard.validMoveRight(d)) {
@@ -116,51 +135,10 @@ public class Main extends Application {
         });
     }
 
-    private boolean checkWin(Boneyard boneyard, HumanPlayer user, ComputerPlayer computer, Board gameBoard, BorderPane root) {
-        if (checkWin (2, boneyard, computer, user, gameBoard) == 1) {
-            clearAndPrint(user, computer, root);
-            root.setCenter(makeLabelGood(new Label("You won! :)")));
-            return true;
-        } else if (checkWin (2, boneyard, computer, user, gameBoard) == 2) {
-            clearAndPrint(user, computer, root);
-            root.setCenter(makeLabelGood(new Label("Computer won ):")));
-            return true;
-        }
-        return false;
-    }
-
-    private void clearAndPrint(HumanPlayer user, ComputerPlayer computer, BorderPane root) {
-        clearRoot(root);
-        root.setStyle("-fx-background-color: lightgray");
-        final int usersScore = calculateScore(user.getRack());
-        final int computerScore = calculateScore(computer.getRack());
-
-        System.out.println("Computer's score: " + computerScore);
-        System.out.println("Player's score: " + usersScore);
-    }
-
-    private void checkWinComputerMove(Boneyard boneyard, HumanPlayer user, ComputerPlayer computer, Board gameBoard, BorderPane root, Label computerText, Label boneyardText) {
-        boolean over = false;
-        if (checkWin (1, boneyard, computer, user, gameBoard) == 1) {
-            clearAndPrint(user, computer, root);
-            over = true;
-            root.setCenter(makeLabelGood(new Label("You won! :)")));
-        } else if (checkWin (1, boneyard, computer, user, gameBoard) == 2) {
-            clearAndPrint(user, computer, root);
-            over = true;
-            root.setCenter(makeLabelGood(new Label("Computer won ):")));
-        }
-        if (!over) {
-            guiComputerMove(boneyard, user, computer, gameBoard, root);
-            checkWin(boneyard, user, computer, gameBoard, root);
-
-            boneyardText.setText(null);
-            boneyardText.setText(boneyard.toString());
-            computerText.setText(null);
-            computerText.setText(computer.toString());
-        }
-    }
-
+    /**
+     * main method contains the logic for the javafx version of the dominos game
+     * @param args args
+     */
     public static void main(String[] args) {
         Scanner scnr = new Scanner(System.in);
         String input;
@@ -192,7 +170,7 @@ public class Main extends Application {
                     myTurn = false;
                     break;
                 }
-                System.out.print(computer.toString() + boneyard + gameBoard + user + printTurn() + printMenu());
+                System.out.print(computer.toString() + boneyard + gameBoard + user + printTurn() + "[p] Play Domino\n[d] Draw from boneyard\n[q] Quit\n");
                 input = scnr.next();
                 switch (input) {
                     case ("p") -> {
@@ -282,6 +260,83 @@ public class Main extends Application {
         }
     }
 
+    /**
+     *  checks if a game over condition is met, and if so calls the clear and print method and sets the end screen.
+     * @param boneyard boneyard dominos
+     * @param user the players rack
+     * @param computer the computers rack
+     * @param gameBoard current game board
+     * @param root javafx borderpane
+     * @return returns true if the game is over and false otherwise
+     */
+    private boolean checkWin(Boneyard boneyard, HumanPlayer user, ComputerPlayer computer, Board gameBoard, BorderPane root) {
+        if (checkWin (2, boneyard, computer, user, gameBoard) == 1) {
+            clearAndPrint(user, computer, root);
+            root.setCenter(makeLabelGood(new Label("You won! :)")));
+            return true;
+        } else if (checkWin (2, boneyard, computer, user, gameBoard) == 2) {
+            clearAndPrint(user, computer, root);
+            root.setCenter(makeLabelGood(new Label("Computer won ):")));
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * clears the javafx pane and prints out scores to commandline
+     * @param user the players rack
+     * @param computer the computers rack
+     * @param root javafx borderpane
+     */
+    private void clearAndPrint(HumanPlayer user, ComputerPlayer computer, BorderPane root) {
+        clearRoot(root);
+        root.setStyle("-fx-background-color: lightgray");
+        final int usersScore = calculateScore(user.getRack());
+        final int computerScore = calculateScore(computer.getRack());
+
+        System.out.println("Computer's score: " + computerScore);
+        System.out.println("Player's score: " + usersScore);
+    }
+
+    /**
+     * first checks if a win condition is met, if not then keeps attempting to place a computer domino
+     * and draws if no move is possible until either a move is found or the a game over condition is met
+     * @param boneyard boneyard dominos
+     * @param user player rack
+     * @param computer computer rack
+     * @param gameBoard current game board
+     * @param root root borderpane
+     * @param computerText number of computer dominos text to be updated
+     * @param boneyardText number of dominos in boneyard text to be updated
+     */
+    private void checkWinComputerMove(Boneyard boneyard, HumanPlayer user, ComputerPlayer computer, Board gameBoard, BorderPane root, Label computerText, Label boneyardText) {
+        boolean over = false;
+        if (checkWin (1, boneyard, computer, user, gameBoard) == 1) {
+            clearAndPrint(user, computer, root);
+            over = true;
+            root.setCenter(makeLabelGood(new Label("You won! :)")));
+        } else if (checkWin (1, boneyard, computer, user, gameBoard) == 2) {
+            clearAndPrint(user, computer, root);
+            over = true;
+            root.setCenter(makeLabelGood(new Label("Computer won ):")));
+        }
+        if (!over) {
+            guiComputerMove(boneyard, user, computer, gameBoard, root);
+            checkWin(boneyard, user, computer, gameBoard, root);
+
+            boneyardText.setText(null);
+            boneyardText.setText(boneyard.toString());
+            computerText.setText(null);
+            computerText.setText(computer.toString());
+        }
+    }
+
+    /**
+     * keeps checking and playing if a computer move is possible, used in both commandline and javafx version
+     * @param boneyard current boneyard
+     * @param computer computer rack
+     * @param gameBoard current game board
+     */
     private static void computerPlayed(Boneyard boneyard, ComputerPlayer computer, Board gameBoard) {
         for (Domino d : computer.getRack()) {
             if (playIfPossible(computer, gameBoard, d)) {
@@ -304,6 +359,15 @@ public class Main extends Application {
         }
     }
 
+    /**
+     *  check win for the commandline version of the game
+     * @param lastPlayed the last player to have played 1 for player, 2 for computer.
+     * @param b boneyard
+     * @param c computer rack
+     * @param h player rack
+     * @param g current board
+     * @return returns 2 if the computer wins, 1 if the player wins, or 0 if neither has won yet.
+     */
     private int checkWin(int lastPlayed, Boneyard b, ComputerPlayer c, HumanPlayer h, Board g) {
         if (b.isEmpty() && (c.getRack().size() == 0 || h.getRack().size() == 0
                 || !availableMove(g, h.getRack()) || !availableMove(g, c.getRack()))) {
@@ -320,6 +384,10 @@ public class Main extends Application {
         return 0;
     }
 
+    /**
+     * used to clear javafx borderpane completely at end of game
+     * @param root borderpane holding everything
+     */
     private void clearRoot (BorderPane root) {
         root.setCenter(null);
         root.setBottom(null);
@@ -328,6 +396,14 @@ public class Main extends Application {
         root.setRight(null);
     }
 
+    /**
+     * used to do some javafx logic then uses the same computer move logic used for the commandline version.
+     * @param boneyard current boneyard
+     * @param user player rack
+     * @param computer computer rack
+     * @param gameBoard current gameboard
+     * @param root javafx borderpane
+     */
     private void guiComputerMove(Boneyard boneyard, HumanPlayer user, ComputerPlayer computer, Board gameBoard, BorderPane root) {
         myTurn = false;
         while (!myTurn) {
@@ -345,6 +421,11 @@ public class Main extends Application {
         root.setBottom(user.drawRack(root));
     }
 
+    /**
+     * adds numbers of all dominos of given domino rack
+     * @param rack either player or computer rack of dominos
+     * @return the score of adding all domino faces in that rack
+     */
     private static int calculateScore (ArrayList<Domino> rack) {
         int score = 0;
         for (Domino d: rack) {
@@ -353,6 +434,14 @@ public class Main extends Application {
         }
         return score;
     }
+
+    /**
+     * Commandline version of asking questions and recieving / error testing inputs given when play move is selected
+     * @param scnr scanner in
+     * @param user player rack
+     * @param gameBoard current gameboard
+     * @param selectedIndex the index of the domino to be played
+     */
     private static void playUserMove(Scanner scnr, HumanPlayer user, Board gameBoard, int selectedIndex) {
         String input;
         System.out.println("Rotate first? (y/n)");
@@ -387,6 +476,13 @@ public class Main extends Application {
     }
 
 
+    /**
+     * plays the computer move and prints out the move played
+     * @param computer computer player
+     * @param gameBoard current board
+     * @param d the domino to be played
+     * @return true if move is played false otherwise
+     */
     private static boolean playIfPossible(ComputerPlayer computer, Board gameBoard, Domino d) {
         if (gameBoard.validMoveRight(d)) {
             gameBoard.addDominoRight(computer.remove(d));
@@ -400,6 +496,12 @@ public class Main extends Application {
         return false;
     }
 
+    /**
+     * checks if there is an available move used in both javafx and commandline version
+     * @param gameBoard current game board
+     * @param rack the rack to check for moves for using the game board
+     * @return true if there's an available move and false otherwise
+     */
     private static boolean availableMove (Board gameBoard, ArrayList<Domino> rack) {
         for (Domino d: rack) {
             if (gameBoard.isEmpty()
@@ -414,9 +516,12 @@ public class Main extends Application {
         return false;
     }
 
-    private static String printMenu() {
-        return "[p] Play Domino\n[d] Draw from boneyard\n[q] Quit\n";
-    }
+    /**
+     * prints the move played
+     * @param d domino being played
+     * @param leftOrRight is it being played on the "left" or "right"
+     * @return string of the move for commandline version
+     */
     private static String printMove(Domino d, String leftOrRight) {
         if (myTurn) {
             return "Playing " + d + " at " + leftOrRight;
@@ -425,6 +530,10 @@ public class Main extends Application {
         }
     }
 
+    /**
+     * prints the current turn
+     * @return string stating who is playing
+     */
     private static String printTurn() {
         if (myTurn) {
             return "Human's turn\n";
@@ -433,6 +542,11 @@ public class Main extends Application {
         }
     }
 
+    /**
+     * used to turn buttons for javafx into appealing looking buttons
+     * @param button button to make beautiful
+     * @return a gorgeous button
+     */
     private Button makeButtonGood(Button button) {
         button.setPrefSize(140,50);
         button.setBackground(Background.fill(Color.rgb(255,255,255)));
@@ -441,6 +555,11 @@ public class Main extends Application {
         return button;
     }
 
+    /**
+     * used to turn labels for javafx into appealing looking labels
+     * @param label label to make beautiful
+     * @return a gorgeous label
+     */
     private Label makeLabelGood(Label label) {
         label.setTextAlignment(TextAlignment.CENTER);
         label.setFont(Font.font("Helvetica", FontWeight.SEMI_BOLD,25));

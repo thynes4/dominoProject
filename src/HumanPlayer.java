@@ -5,16 +5,31 @@ import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 
+/**
+ * Human player used in commandline and javafx version
+ */
 public class HumanPlayer {
     private final ArrayList<Domino> rack = new ArrayList<>();
+    /**
+     * initializes human player
+     * @param boneyard takes dominos from the boneyard for computers hand
+     */
     public HumanPlayer(Boneyard boneyard) {
         for (int i = 0; i < 7; i++) {
             rack.add(boneyard.draw());
         }
     }
+
+    /**
+     * @return number of dominos in player rack
+     */
     public int getSize() {
         return rack.size();
     }
+
+    /**
+     * @return string representation of the players domino tray
+     */
     public String toString() {
         StringBuilder sb = new StringBuilder();
         if(!rack.isEmpty()) {
@@ -41,30 +56,58 @@ public class HumanPlayer {
         sb.append("]\n");
         return sb.toString();
     }
+
+    /**
+     * @param index index of domino to remove from player rack
+     * @return the removed domino
+     */
     public Domino remove (int index) {
         Domino removed = rack.get(index);
         rack.remove(removed);
         return removed;
     }
+    /**
+     * @param d domino to remove from player rack
+     * @return the removed domino
+     */
     public Domino remove (Domino d) {
         rack.remove(d);
         return d;
     }
+    /**
+     * rotates the domino at the given index in the player rack
+     */
     public void rotateAt(int index) {
         Domino d = rack.get(index);
         d.rotate();
         rack.set(index, d);
     }
+    /**
+     * returns the player rack
+     */
     public ArrayList<Domino> getRack() {
         return rack;
     }
+
+    /**
+     * @param index index of domino to return
+     * @return domino at current index
+     */
     public Domino get (int index) {
         return rack.get(index);
     }
 
+    /**
+     * @param d domino to add to player rack
+     */
     public void add (Domino d) {
         rack.add(0, d);
     }
+    /**
+     * Draws the player rack for the javafx version also contains the logic to set and remove selected status of a
+     * domino when they are clicked
+     * @param root borderpane to be drawn on
+     */
     public VBox drawRack(BorderPane root) {
         VBox container = new VBox();
         VBox buffer = new VBox();
